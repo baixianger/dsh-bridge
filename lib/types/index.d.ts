@@ -7,7 +7,7 @@
 import type { Context } from '@deepseek-ai/cordis';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import { type SessionId as SessionIdValue } from '@deepseek-ai/dsh-session';
-export declare const name = "session-messaging";
+export declare const name = "dsh-bridge";
 export declare const inject: string[];
 export interface LocalMessage {
     readonly id: string;
@@ -30,6 +30,7 @@ export interface LocalSessionMessaging {
 }
 declare module '@deepseek-ai/cordis' {
     interface Context {
+        dshBridge: LocalSessionMessaging;
         sessionMessaging: LocalSessionMessaging;
     }
 }
