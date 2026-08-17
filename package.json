@@ -1,11 +1,11 @@
 {
-  "name": "@deepseek-ai/dsh-session-messaging",
-  "description": "Same-process session-to-session messaging for DeepSeek Harness",
+  "name": "dsh-bridge",
+  "description": "Local session messaging and event bridge for DeepSeek Harness",
   "version": "0.1.0-rc.5",
   "publishConfig": { "access": "public" },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/baixianger/dsh-session-messaging.git"
+    "url": "git+https://github.com/baixianger/dsh-bridge.git"
   },
   "type": "module",
   "main": "lib/index.js",
