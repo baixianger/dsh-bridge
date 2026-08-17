@@ -11,11 +11,12 @@ export declare const name = "dsh-bridge";
 export declare const inject: string[];
 export interface LocalMessage {
     readonly id: string;
-    readonly from: SessionIdValue;
+    readonly from: string;
     readonly to: SessionIdValue;
     readonly text: string;
     readonly createdAt: number;
     readonly delivered: boolean;
+    readonly transport: string;
 }
 export interface SendMessageResult {
     readonly messageId: string;
@@ -26,6 +27,11 @@ export interface SendMessageResult {
 export interface LocalSessionMessaging {
     list(): readonly SessionIdValue[];
     send(from: Agent, to: SessionIdValue, text: string): SendMessageResult;
+    deliverExternal(from: string, to: SessionIdValue, text: string, options?: {
+        id?: string;
+        transport?: string;
+    }): SendMessageResult;
+    subscribe(listener: (message: LocalMessage) => void): () => void;
     receive(sessionId: SessionIdValue, limit: number): readonly LocalMessage[];
 }
 declare module '@deepseek-ai/cordis' {

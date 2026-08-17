@@ -12,6 +12,10 @@ messages as a human-facing group chat. Neither is required for local use.
 The plugin exposes the `ctx.dshBridge` service and registers `session_list`,
 `session_send`, and `session_messages` for agents. The old `ctx.sessionMessaging`
 accessor remains as a temporary compatibility alias.
+
+`ctx.dshBridge.deliverExternal()` is the controlled inbound seam for a trusted
+transport such as Weave: it emits the same session follow-up and audit record
+as local delivery, rather than letting a transport manipulate agents directly.
 Delivery uses the public `ctx.agents` registry and `Agent.followup()`, so an
 idle target is woken and a busy target receives ordinary queued work. A bounded
 in-memory recent log (the latest 1,000 delivered messages) is kept only for
