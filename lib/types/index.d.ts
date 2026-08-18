@@ -24,13 +24,29 @@ export interface SendMessageResult {
     readonly to: string;
     readonly delivered: boolean;
 }
+export type SessionRuntimeState = 'idle' | 'running' | 'waking' | 'offline' | 'archived' | 'missing';
+export interface SessionRuntimeStatus {
+    readonly sessionId: string;
+    readonly state: SessionRuntimeState;
+    readonly live: boolean;
+}
 export interface LocalSessionMessaging {
     list(): readonly SessionIdValue[];
-    send(from: Agent, to: SessionIdValue, text: string): SendMessageResult;
+    status(sessionId: SessionIdValue): Promise<SessionRuntimeStatus>;
+    send(from: Agent, to: SessionIdValue, text: string): Promise<SendMessageResult>;
     deliverExternal(from: string, to: SessionIdValue, text: string, options?: {
         id?: string;
         transport?: string;
-    }): SendMessageResult;
+    }): Promise<SendMessageResult>;
+    subscribe(listener: (message: LocalMessage) => void): () => void;
+    receive(sessionId: SessionIdValue, limit: number): readonly LocalMessage[];
+}
+export declare class LocalSessionMessagingImpl implements LocalSessionMessaging {
+    constructor(ctx: Context);
+    list(): readonly SessionIdValue[];
+    status(sessionId: SessionIdValue): Promise<SessionRuntimeStatus>;
+    send(from: Agent, to: SessionIdValue, text: string): Promise<SendMessageResult>;
+    deliverExternal(from: string, to: SessionIdValue, text: string, options?: { id?: string; transport?: string }): Promise<SendMessageResult>;
     subscribe(listener: (message: LocalMessage) => void): () => void;
     receive(sessionId: SessionIdValue, limit: number): readonly LocalMessage[];
 }

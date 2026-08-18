@@ -16,8 +16,12 @@ accessor remains as a temporary compatibility alias.
 `ctx.dshBridge.deliverExternal()` is the controlled inbound seam for a trusted
 transport such as Weave: it emits the same session follow-up and audit record
 as local delivery, rather than letting a transport manipulate agents directly.
-Delivery uses the public `ctx.agents` registry and `Agent.followup()`, so an
-idle target is woken and a busy target receives ordinary queued work. A bounded
+Delivery uses the public `ctx.agents` registry and `Agent.followup()`. An idle
+target is woken, a running target receives ordinary queued work, and a persisted
+offline target is resumed through DSH's configured Host agent resolver before
+delivery. Concurrent messages to the same cold session share one resume operation.
+The resolver reconstructs the recorded agent preset and model selection exactly
+as the Web host does. A bounded
 in-memory recent log (the latest 1,000 delivered messages) is kept only for
 `session_messages` replay and diagnostics; it is not a second delivery queue.
 Messages carry sender, target, UUID, and timestamp metadata.
@@ -40,7 +44,8 @@ dsh plugin --profile web add dsh-bridge@next
   older than the latest 1,000 are evicted; durable inbox/outbox persistence is
   still deferred until a cross-process relay needs it.
 - **Delivery acknowledgement** — the current result means the target was live
-  and accepted the follow-up call, not that the target model processed it.
+  (or successfully resumed) and accepted the follow-up call, not that the target
+  model processed it.
 
 ## Model Experience
 
