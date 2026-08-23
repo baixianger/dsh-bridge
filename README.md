@@ -26,6 +26,23 @@ in-memory recent log (the latest 1,000 delivered messages) is kept only for
 `session_messages` replay and diagnostics; it is not a second delivery queue.
 Messages carry sender, target, UUID, and timestamp metadata.
 
+`ctx.dshBridge.status(sessionId)` reports a session's presentation state:
+`waking` while a cold resume is in flight, `archived` when the id is in the
+workspace registry's archive set, `idle`/`running` for live agents, `offline`
+for persisted sessions, and `missing` otherwise. Archive takes precedence over
+live presence: archiving a session hides it from live surfaces (such as
+dsh-chat room member indicators) without stopping its agent. Delivery to an
+archived session is rejected: `session_send` and `deliverExternal` refuse to
+wake or reach an archived target, so an archived agent stops receiving messages
+entirely rather than merely dropping off live surfaces.
+
+`session_send` accepts a target session id or its human-readable title. The
+optional `mode` parameter controls interpretation: `auto` (default) tries the
+id first then the title, `id` accepts an exact known id only, and `name`
+matches titles only. Titles resolve accent-insensitively through the live
+`sessionTitle` service and the persisted projection cache; an unknown name or
+an ambiguous title rejects with the candidate ids.
+
 This package intentionally does not implement cross-host transport. `dsh-weave`
 will provide the authenticated network backend while preserving the local
 message semantics.
