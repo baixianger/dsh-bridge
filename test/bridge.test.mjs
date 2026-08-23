@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { LocalSessionMessagingImpl } from "../lib/index.js";
+import { LocalSessionMessagingImpl, apply } from "../lib/index.js";
 
 function agent(id, status = "idle") {
   const messages = [];
@@ -121,4 +121,16 @@ test("concurrent cold deliveries share one resume", async () => {
   ]);
   assert.equal(fixture.resumes, 1);
   assert.equal(fixture.agents.get("cold").messages.length, 2);
+});
+
+test("session_messages output schema declares the delivered-message transport field", () => {
+  const captured = [];
+  apply({
+    accessor() {},
+    tools: { register(definition) { captured.push(definition); } }
+  });
+  const tool = captured.find((definition) => definition.name === "session_messages");
+  const items = tool.output.schema.items;
+  assert.equal(items.properties.transport.type, "string");
+  assert.equal(items.required.includes("transport"), true);
 });
