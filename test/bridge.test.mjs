@@ -123,10 +123,38 @@ test("concurrent cold deliveries share one resume", async () => {
   assert.equal(fixture.agents.get("cold").messages.length, 2);
 });
 
+test("duplicate external message ids are acknowledged without a second follow-up", async () => {
+  const live = agent("target");
+  const fixture = harness({ live });
+  const bridge = new LocalSessionMessagingImpl(fixture.ctx);
+  const request = ["room", "target", "once", { id: "message-stable", transport: "weave" }];
+  const [first, second] = await Promise.all([
+    bridge.deliverExternal(...request),
+    bridge.deliverExternal(...request),
+  ]);
+  assert.equal(first.messageId, "message-stable");
+  assert.deepEqual(second, first);
+  assert.equal(live.messages.length, 1);
+  assert.equal(bridge.receive("target", 10).length, 1);
+});
+
+test("the same external message id can fan out to different recipients", async () => {
+  const one = agent("target-one"); const two = agent("target-two");
+  const fixture = harness({ live: one }); fixture.agents.set(two.id, two);
+  const bridge = new LocalSessionMessagingImpl(fixture.ctx);
+  await Promise.all([
+    bridge.deliverExternal("room", "target-one", "broadcast", { id: "same-id", transport: "chat" }),
+    bridge.deliverExternal("room", "target-two", "broadcast", { id: "same-id", transport: "chat" })
+  ]);
+  assert.equal(one.messages.length, 1);
+  assert.equal(two.messages.length, 1);
+});
+
 test("session_messages output schema declares the delivered-message transport field", () => {
   const captured = [];
   apply({
     accessor() {},
+    provide() {},
     tools: { register(definition) { captured.push(definition); } }
   });
   const tool = captured.find((definition) => definition.name === "session_messages");
