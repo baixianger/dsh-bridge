@@ -1,5 +1,7 @@
 # dsh-bridge
 
+[English](README.md) | [简体中文](README.zh.md)
+
 > Local, cross-session messaging for DeepSeek Harness.
 
 **DSH Bridge** is the local messaging foundation of the DSH family. It lets live
@@ -8,6 +10,26 @@ Web UI and no network transport.
 
 `dsh-weave` can extend Bridge across machines; `dsh-chat` can present its
 messages as a human-facing group chat. Neither is required for local use.
+
+## What it gives you
+
+- Session discovery and direct delivery inside one DSH Host.
+- Human-readable title lookup as well as exact session-id targeting.
+- Cold-session resume before delivery, preserving the recorded agent preset and model.
+- Clear `idle`, `running`, `waking`, `offline`, `archived`, and `missing` states.
+- One controlled inbound seam for trusted transports such as `dsh-weave`.
+
+## Quick start
+
+```bash
+dsh plugin --profile web add dsh-bridge@next
+dsh web
+```
+
+After installation, agents can use `session_list`, `session_send`, and
+`session_messages` directly. There is no separate settings page or Web UI.
+
+## How delivery works
 
 The plugin exposes the `ctx.dshBridge` service and registers `session_list`,
 `session_send`, and `session_messages` for agents. The old `ctx.sessionMessaging`
@@ -46,12 +68,6 @@ an ambiguous title rejects with the candidate ids.
 This package intentionally does not implement cross-host transport. `dsh-weave`
 will provide the authenticated network backend while preserving the local
 message semantics.
-
-## Install
-
-```bash
-dsh plugin --profile web add dsh-bridge@next
-```
 
 ## Known Limitations and Deferred Work
 

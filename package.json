@@ -1,8 +1,11 @@
 {
   "name": "dsh-bridge",
   "description": "Local session messaging and event bridge for DeepSeek Harness",
-  "version": "0.1.0-rc.14",
-  "publishConfig": { "access": "public", "tag": "next" },
+  "version": "0.1.0-rc.15",
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/baixianger/dsh-bridge.git"
@@ -25,7 +28,14 @@
       "patch": "./cordis.patch.yml"
     }
   },
-  "files": ["lib/index.js", "lib/types/**/*.d.ts", "cordis.patch.yml", "README.md", "RELEASES.md"],
+  "files": [
+    "lib/index.js",
+    "lib/types/**/*.d.ts",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "RELEASES.md"
+  ],
   "license": "MIT",
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
