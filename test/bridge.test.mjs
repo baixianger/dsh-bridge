@@ -21,7 +21,7 @@ function harness({ live, persisted = [] } = {}) {
       if (!persisted.includes(String(resumeSessionId))) throw new Error("session is not persisted");
       const resumed = agent(String(resumeSessionId)); agents.set(resumed.id, resumed); return resumed;
     } } : undefined; } } },
-    sessionPersistence: { async list() { return persisted.map((id) => ({ id })); } },
+    sessionPersistence: { async list() { return persisted.map((id) => ({ header: { id }, revision: `revision-${id}` })); } },
     workspaceRegistry: { archivedSessionIds: [] },
     get(name) { return this[name] }
   };
