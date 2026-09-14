@@ -1,10 +1,10 @@
 {
   "name": "dsh-bridge",
-  "description": "Local session messaging and event bridge for DeepSeek Harness",
-  "version": "0.1.0-rc.16",
+  "description": "Local session messaging for DeepSeek Harness",
+  "version": "0.1.0-rc.17",
   "publishConfig": {
     "access": "public",
-    "tag": "next"
+    "tag": "latest"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,9 @@
     ".": {
       "types": "./lib/types/index.d.ts",
       "default": "./lib/index.js"
-    }
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
   },
   "dsh": {
     "bundle": {
@@ -34,7 +36,9 @@
     "cordis.patch.yml",
     "README.md",
     "README.zh.md",
-    "RELEASES.md"
+    "RELEASES.md",
+    "LICENSE",
+    "docs/assets/"
   ],
   "license": "MIT",
   "peerDependencies": {
@@ -42,13 +46,18 @@
     "@deepseek-ai/dsh-agent": ">=0.1.0-rc.5",
     "@deepseek-ai/dsh-llm": ">=0.1.0-rc.5",
     "@deepseek-ai/dsh-session": ">=0.1.0-rc.5",
-    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.5"
+    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.5",
+    "@deepseek-ai/schemastery": "^3.18.1"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-agent": ">=0.1.0-rc.5",
     "@deepseek-ai/dsh-llm": ">=0.1.0-rc.5",
     "@deepseek-ai/dsh-session": ">=0.1.0-rc.5",
-    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.5"
-  }
+    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.5",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "keywords": [
+    "dsh-plugin"
+  ]
 }

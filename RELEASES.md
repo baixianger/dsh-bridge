@@ -1,5 +1,11 @@
 # Releases
 
+## 0.1.0-rc.17 · 2026-09-14
+
+Stop late follow-ups after cancelled cold resumes, preserve recorded session models, tighten package contents, and refresh bilingual delivery documentation.
+
+Source: [`v0.1.0-rc.17`](https://github.com/baixianger/dsh-bridge/tree/v0.1.0-rc.17). Distribution: `latest`.
+
 Release tags point at the exact source commit used to build the package. The bookkeeping commit that fills in a source SHA intentionally comes after that tag.
 
 | Version | Tag | Source commit | Summary |

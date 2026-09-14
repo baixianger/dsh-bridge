@@ -8,6 +8,9 @@ import type { Context } from '@deepseek-ai/cordis';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import { type SessionId as SessionIdValue } from '@deepseek-ai/dsh-session';
 export declare const name = "dsh-bridge";
+/** Deployment-varying bounds resolved from cordis.yml. */
+export interface DshBridgeConfig { recentMessages?: number; dedupeCapacity?: number; maxMessagesPerRead?: number; }
+export declare const Config: import("@standard-schema/spec").StandardSchemaV1<unknown, DshBridgeConfig>;
 export declare const inject: string[];
 export interface LocalMessage {
     readonly id: string;
@@ -32,11 +35,12 @@ export interface SessionRuntimeStatus {
 }
 export interface LocalSessionMessaging {
     list(): readonly SessionIdValue[];
-    status(sessionId: SessionIdValue): Promise<SessionRuntimeStatus>;
+    status(sessionId: SessionIdValue, signal?: AbortSignal): Promise<SessionRuntimeStatus>;
     send(from: Agent, to: SessionIdValue, text: string): Promise<SendMessageResult>;
     deliverExternal(from: string, to: SessionIdValue, text: string, options?: {
         id?: string;
         transport?: string;
+        signal?: AbortSignal;
     }): Promise<SendMessageResult>;
     subscribe(listener: (message: LocalMessage) => void): () => void;
     receive(sessionId: SessionIdValue, limit: number): readonly LocalMessage[];
@@ -44,9 +48,9 @@ export interface LocalSessionMessaging {
 export declare class LocalSessionMessagingImpl implements LocalSessionMessaging {
     constructor(ctx: Context);
     list(): readonly SessionIdValue[];
-    status(sessionId: SessionIdValue): Promise<SessionRuntimeStatus>;
+    status(sessionId: SessionIdValue, signal?: AbortSignal): Promise<SessionRuntimeStatus>;
     send(from: Agent, to: SessionIdValue, text: string): Promise<SendMessageResult>;
-    deliverExternal(from: string, to: SessionIdValue, text: string, options?: { id?: string; transport?: string }): Promise<SendMessageResult>;
+    deliverExternal(from: string, to: SessionIdValue, text: string, options?: { id?: string; transport?: string; signal?: AbortSignal }): Promise<SendMessageResult>;
     subscribe(listener: (message: LocalMessage) => void): () => void;
     receive(sessionId: SessionIdValue, limit: number): readonly LocalMessage[];
 }
@@ -56,5 +60,4 @@ declare module '@deepseek-ai/cordis' {
         sessionMessaging: LocalSessionMessaging;
     }
 }
-export declare function apply(ctx: Context): void;
-//# sourceMappingURL=index.d.ts.map
+export declare function apply(ctx: Context, config?: DshBridgeConfig): void;
