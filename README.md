@@ -12,11 +12,13 @@
 
 Let sessions in one DeepSeek Harness host discover each other and exchange messages. Bridge is the local foundation beneath Chat rooms and trusted Weave delivery.
 
-## Three tools, one local host
+## Five tools, one local host
 
 | Tool | Purpose |
 | --- | --- |
-| `session_list` | Discover sessions and their current state. |
+| `session_list` | Discover sessions, their state, and the workspace each belongs to. |
+| `session_spawn` | Create a new top-level session and hand it a task in one call. |
+| `session_status` | Report workspace/project ownership and runtime state for one session or all. |
 | `session_send` | Send by exact session ID or human-readable title. |
 | `session_messages` | Read a bounded recent delivery log. |
 
@@ -30,6 +32,18 @@ dsh web
 Ask an agent to list sessions, then send a message to the intended session. Bridge adds tools directly; it has no separate settings page.
 
 For `session_send`, `mode: auto` tries the ID before the title; `id` and `name` select one lookup method. Titles match case-insensitively. Ambiguous names return candidate IDs instead of choosing a recipient for you.
+
+## Finding the right target
+
+`session_list` returns bare session IDs by default, unchanged from earlier releases. `session_list({ verbose: true })` and `session_status` add the fields that make a target identifiable without reading the session directory by hand: title, working directory, owning workspace, and runtime state (`waking` / `running` / `idle` / `offline` / `archived` / `missing`). `session_status` also covers persisted sessions that have no live agent yet, which the live-only listing cannot show.
+
+A session's workspace comes from the registry's durable account; when the account does not list it, the session's own canonical `cwd` is matched against registered workspace paths. A session that belongs to no registered workspace reports `null` rather than guessing.
+
+## Spawning a peer session
+
+`session_spawn` creates the same kind of conversation the sidebar shows — a durable top-level session, not a subagent child — in the caller's working directory. It attaches the new session to that workspace, mounts the caller's preset, gives it the caller's model route, and delivers the task as its first user message.
+
+The call returns as soon as the task is queued; it never waits for the task to finish. Use the returned `sessionId` with `session_send` to follow up, and with `session_status` to see where it landed.
 
 ## Delivery that respects session state
 
@@ -47,6 +61,7 @@ flowchart LR
 - Concurrent requests to a cold session share one resume operation.
 - Archived sessions reject delivery and are not woken.
 - Cancelling during a cold resume prevents a late follow-up, even if the shared load finishes.
+- `session_spawn` queues the task on the session it just created and returns. Cancelling that call before the session exists creates nothing; cancelling it after the session exists still delivers, so a conversation is never left without its first message.
 
 A delivery acknowledgement means the session accepted the follow-up. It does not mean the model has processed it or completed the task.
 
