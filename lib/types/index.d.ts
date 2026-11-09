@@ -43,6 +43,7 @@ export interface LocalSessionMessaging {
         signal?: AbortSignal;
     }): Promise<SendMessageResult>;
     subscribe(listener: (message: LocalMessage) => void): () => void;
+    /** Read the recent audit without acknowledging pending inbox work. */
     receive(sessionId: SessionIdValue, limit: number): readonly LocalMessage[];
 }
 export declare class LocalSessionMessagingImpl implements LocalSessionMessaging {
@@ -53,6 +54,8 @@ export declare class LocalSessionMessagingImpl implements LocalSessionMessaging 
     deliverExternal(from: string, to: SessionIdValue, text: string, options?: { id?: string; transport?: string; signal?: AbortSignal }): Promise<SendMessageResult>;
     subscribe(listener: (message: LocalMessage) => void): () => void;
     receive(sessionId: SessionIdValue, limit: number): readonly LocalMessage[];
+    /** Acknowledge unchanged returned Bridge followups in the owning Agent's inbox. */
+    read(agent: Agent, limit: number): readonly LocalMessage[];
 }
 declare module '@deepseek-ai/cordis' {
     interface Context {
