@@ -18,7 +18,7 @@ Let sessions in one DeepSeek Harness host discover each other and exchange messa
 | --- | --- |
 | `session_list` | Discover sessions and their current state. |
 | `session_send` | Send by exact session ID or human-readable title. |
-| `session_messages` | Read a bounded recent delivery log. |
+| `session_messages` | Read recent deliveries and acknowledge matching pending follow-ups. |
 
 ## Quick start
 
@@ -48,7 +48,9 @@ flowchart LR
 - Archived sessions reject delivery and are not woken.
 - Cancelling during a cold resume prevents a late follow-up, even if the shared load finishes.
 
-A delivery acknowledgement means the session accepted the follow-up. It does not mean the model has processed it or completed the task.
+A delivery acknowledgement means the session accepted the follow-up. It does not mean the model has processed it or completed the task. On v4 hosts, Bridge deliveries are attributed to `plugin:dsh-bridge`.
+
+`session_messages` returns a bounded recent audit and acknowledges corresponding unchanged Bridge follow-ups still pending in the current session through the host inbox. Human messages, unreturned or other sessions' follow-ups, and edited messages are untouched; already-claimed follow-ups are a no-op. This does not delete conversation history or audit records. A small limit repeatedly returns the same recent records, not an unread cursor.
 
 ## Configuration
 
@@ -60,13 +62,13 @@ A delivery acknowledgement means the session accepted the follow-up. It does not
 
 ## Plugin integration
 
-`ctx.dshBridge` is the public service. Trusted transports call `deliverExternal()` so local and external delivery share the same follow-up and audit path. Its optional `signal` carries cancellation through session resolution.
+`ctx.dshBridge` is the public service. Trusted transports call `deliverExternal()` so local and external delivery share the same follow-up and audit path. Its optional `signal` carries cancellation through session resolution. The public `receive()` remains audit-only and does not acknowledge follow-ups.
 
 [DSH Weave](https://github.com/baixianger/dsh-weave) supplies cross-host transport; [DSH Chat](https://github.com/baixianger/dsh-chat) supplies rooms and a Web conversation view. Neither is required for local messaging.
 
 ## Retention & boundaries
 
-Bridge operates within one host process. Its recent-message log and duplicate-ID table live in memory and reset on plugin unload or reload; they are not a durable mailbox. The old `ctx.sessionMessaging` accessor remains a temporary compatibility alias.
+Bridge operates within one host process. Its recent-message log and duplicate-ID table live in memory and reset on plugin unload or reload; they are not a durable mailbox. Follow-up identity is tracked in process memory, so old pending messages that are no longer tracked after restart or retention expiry cannot be acknowledged by a read. The old `ctx.sessionMessaging` accessor remains a temporary compatibility alias.
 
 ## Development & feedback
 
