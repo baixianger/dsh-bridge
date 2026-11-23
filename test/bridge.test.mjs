@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { releasedV4SessionFormatCodec } from "@deepseek-ai/dsh-session-format-v3-to-v4";
 import { Config, LocalSessionMessagingImpl, apply } from "../lib/index.js";
 
 function agent(id, status = "idle") {
@@ -110,6 +111,39 @@ test("resumes a cold session before delivery", async () => {
   assert.equal(result.delivered, true);
   assert.equal(fixture.resumes, 1);
   assert.equal(fixture.agents.get("cold").messages.length, 1);
+});
+
+test("a relayed message passes Session format v4 write admission", async () => {
+  // Format v4 rejects the retired `{ kind: "plugin" }` wrapper with
+  // "format v4 message requires a producer-owned source kind", so a delivery
+  // that the host accepted could still kill the target's turn and leave the
+  // event unwritten. `encodeEvent` is the same admission gate persistence and
+  // export run, so passing here means the relayed message can be persisted.
+  const live = agent("target");
+  const fixture = harness({ live });
+  const bridge = new LocalSessionMessagingImpl(fixture.ctx);
+  await bridge.deliverExternal("room", "target", "hello", { id: "message-v4", transport: "chat" });
+
+  const [message] = live.messages;
+  assert.equal(message.source.kind, "plugin:dsh-bridge");
+  assert.equal(message.source.form, "relay");
+  assert.equal(message.source.messageId, "message-v4");
+  assert.equal(message.source.transport, "chat");
+  assert.equal(message.source.from, "room");
+  assert.equal(message.source.to, "target");
+
+  const spliced = (source) => ({
+    type: "agent/inbox/spliced",
+    seq: 7,
+    time: Date.now(),
+    data: { target: "next-turn", start: 0, inserted: [{ ...message, source }] }
+  });
+  assert.doesNotThrow(() => releasedV4SessionFormatCodec.encodeEvent(spliced(message.source)));
+  // The pre-fix v3 wrapper is what the regression looks like: it must stay rejected,
+  // otherwise this test could pass while the plugin writes an inadmissible row.
+  assert.throws(() => releasedV4SessionFormatCodec.encodeEvent(
+    spliced({ kind: "plugin", plugin: "dsh-bridge", form: "relay" })
+  ), /producer-owned source kind/);
 });
 
 test("concurrent cold deliveries share one resume", async () => {
